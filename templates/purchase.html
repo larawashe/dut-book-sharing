@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Purchase Book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<div class="header">
+    <h1>Book Purchase</h1>
+</div>
+
+<div class="container purchase-container">
+    <h2>Confirm Your Interest</h2>
+
+    <div class="book-card">
+        {% if book.image_filename %}
+            <img src="{{ url_for('static', filename='book_images/' + book.image_filename) }}" alt="Book Image" class="book-image">
+        {% endif %}
+        <div class="book-details">
+            <h3>{{ book.title }}</h3>
+            <p><strong>Author:</strong> {{ book.author }}</p>
+            <p><strong>Edition:</strong> {{ book.edition }}</p>
+            <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+            <p><strong>Price:</strong> {{ book.price }} RMB</p>
+            <p><strong>Seller:</strong> {{ book.posted_by }}</p>
+            <p><strong>Contact:</strong> {{ book.contact }}</p>
+        </div>
+    </div>
+
+    <h3>Payment</h3>
+    {% if book.payment_qr %}
+        <p>Scan the QR code below to pay using WeChat or Alipay:</p>
+        <img src="{{ url_for('static', filename='book_images/' + book.payment_qr) }}" width="250" alt="Payment QR Code">
+    {% else %}
+        <p>The seller has not provided a payment QR code yet.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('send_message', to_username=book.posted_by) }}" class="btn-message">Send Message to Seller</a>
+    <a href="{{ url_for('available_books') }}" class="back-btn">← Back to Books</a>
+
+</div>
+
+</body>
+</html>

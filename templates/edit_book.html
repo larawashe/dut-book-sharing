@@ -1,0 +1,44 @@
+@app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
+def edit_book(book_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    book = Book.query.get_or_404(book_id)
+
+    if book.posted_by != session['username']:
+        return "Access Denied", 403
+
+    if request.method == 'POST':
+        book.title = request.form.get('title')
+        book.author = request.form.get('author')
+        book.edition = request.form.get('edition')
+        book.condition = request.form.get('condition')
+        book.price = request.form.get('price')
+        book.description = request.form.get('description')
+        book.campus = request.form.get('campus')
+        book.contact = request.form.get('contact')
+        book.email = request.form.get('email')
+        book.isbn = request.form.get('isbn')
+        book.language = request.form.get('language')
+        book.listing_type = request.form.get('listing_type')
+        book.sold = True if request.form.get('sold') else False
+
+        image = request.files.get('book_image')
+        if image and image.filename != '':
+            image_filename = f"{book.isbn}.jpg"
+            img = Image.open(image)
+            img.thumbnail((120, 120))
+            img.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            book.image_filename = image_filename
+
+        qr = request.files.get('payment_qr')
+        if qr and qr.filename != '':
+            qr_filename = f"{book.isbn}_qr.jpg"
+            qr.save(os.path.join(app.config['UPLOAD_FOLDER'], qr_filename))
+            book.payment_qr = qr_filename
+
+        db.session.commit()
+        return redirect(url_for('available_books'))
+
+    lang = request.args.get('lang', 'English')
+    return render_template('edit_book.html', book=book, lang=lang)

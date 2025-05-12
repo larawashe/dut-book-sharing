@@ -1,0 +1,57 @@
+@app.route('/post_book', methods=['GET', 'POST'])
+def post_book():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        author = request.form.get('author')
+        edition = request.form.get('edition')
+        condition = request.form.get('condition')
+        price = request.form.get('price')
+        description = request.form.get('description')
+        campus = request.form.get('campus')
+        contact = request.form.get('contact')
+        email = request.form.get('email')
+        isbn = request.form.get('isbn')
+        language = request.form.get('language')
+        listing_type = request.form.get('listing_type')
+
+        image = request.files.get('book_image')
+        image_filename = None
+        if image and image.filename != '':
+            image_filename = f"{isbn}.jpg"
+            img = Image.open(image)
+            img.thumbnail((120, 120))  # Resize to 120x120px
+            img.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+
+        qr = request.files.get('payment_qr')
+        qr_filename = None
+        if qr and qr.filename != '':
+            qr_filename = f"{isbn}_qr.jpg"
+            qr.save(os.path.join(app.config['UPLOAD_FOLDER'], qr_filename))
+
+        new_book = Book(
+            title=title,
+            author=author,
+            edition=edition,
+            condition=condition,
+            price=price,
+            description=description,
+            campus=campus,
+            contact=contact,
+            email=email,
+            isbn=isbn,
+            language=language,
+            listing_type=listing_type,
+            posted_by=session['username'],
+            image_filename=image_filename,
+            payment_qr=qr_filename
+        )
+
+        db.session.add(new_book)
+        db.session.commit()
+        return redirect(url_for('available_books'))
+
+    lang = request.args.get('lang', 'English')
+    return render_template('post_book.html', lang=lang)

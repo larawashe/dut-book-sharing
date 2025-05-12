@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Available Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<div class="header">
+    <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo" style="height: 50px;">
+    <h1>Dalian University of Technology</h1>
+    <h2>Second Hand Book Sharing Platform</h2>
+</div>
+
+<div class="container">
+
+    <div class="language-switch">
+        <strong>Language:</strong>
+        <a href="?lang=English">English</a> |
+        <a href="?lang=Chinese">中文</a>
+    </div>
+
+    <form method="get" class="search-bar">
+        <input type="text" name="search" placeholder="Search by title, author, or ISBN">
+        <button type="submit">Search</button>
+    </form>
+
+    {% if 'username' in session %}
+        <p>Welcome, {{ session.username }}!</p>
+        <a href="{{ url_for('post_book') }}?lang={{ lang }}">Post a Book</a> |
+        <a href="{{ url_for('profile') }}?lang={{ lang }}">My Profile</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('login') }}?lang={{ lang }}">Login</a> |
+        <a href="{{ url_for('register') }}?lang={{ lang }}">Register</a>
+    {% endif %}
+
+    <h2>Available Books</h2>
+
+    {% if books %}
+        {% for book in books %}
+            <div class="book-card">
+                {% if book.image_filename %}
+                    <img src="{{ url_for('static', filename='book_images/' + book.image_filename) }}" alt="Book Image" class="book-image">
+                {% endif %}
+                <div class="book-details">
+                    <h3>{{ book.title }}</h3>
+                    <p><strong>Author:</strong> {{ book.author }}</p>
+                    <p><strong>Edition:</strong> {{ book.edition }}</p>
+                    <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+                    <p><strong>Condition:</strong> {{ book.condition }}%</p>
+                    <p><strong>Price:</strong> {{ book.price }} RMB</p>
+                    <p><strong>Description:</strong> {{ book.description }}</p>
+                    <p><strong>Campus:</strong> {{ book.campus }}</p>
+                    <p><strong>Contact:</strong> {{ book.contact }}</p>
+                </div>
+
+                <a href="{{ url_for('i_want_this', book_id=book.id) }}" class="btn-want">I Want This</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No books available yet.</p>
+    {% endif %}
+
+    <a href="{{ url_for('welcome') }}?lang={{ lang }}" class="back-btn">← Back to Welcome</a>
+
+</div>
+
+</body>
+</html>

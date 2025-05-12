@@ -1,0 +1,253 @@
+/* static/css/styles.css */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(120deg, #445, #223);
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    max-width: 600px;
+    width: 90%;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.header {
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: #222;
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 2rem;
+}
+
+h2 {
+    color: #444;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-weight: 400;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 5px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #3399ff;
+    box-shadow: 0 0 4px rgba(51, 153, 255, 0.4);
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+button {
+    background-color: #3399ff;
+    color: #fff;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #267acc;
+}
+
+.book-card {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    margin-bottom: 30px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+}
+
+.book-details {
+    flex-grow: 1;
+}
+
+a {
+    color: #0066cc;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+/* Pagination */
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination span,
+.pagination a {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+}
+
+.pagination span.current {
+    background-color: #3399ff;
+    color: white;
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .book-card {
+        flex-direction: column;
+    }
+
+    .book-image {
+        width: 100%;
+        height: auto;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+}
+/* Background Image */
+body {
+    background-image: url('/static/images/dut-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.btn-want {
+    display: inline-block;
+    background-color: #28a745;
+    color: white;
+    padding: 10px 16px;
+    margin-top: 10px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.btn-want:hover {
+    background-color: #218838;
+}
+.purchase-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.purchase-container img {
+    max-width: 100%;
+    height: auto;
+}
+.book-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 20px;
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .book-card {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .book-image {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .actions {
+        justify-content: center;
+    }
+
+    .language-switch,
+    .search-bar {
+        text-align: center;
+    }
+
+    .search-bar input {
+        width: 100%;
+        margin-top: 10px;
+    }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<div class="header">
+    <h1>{{ user.username }}'s Profile</h1>
+</div>
+
+<div class="container">
+    <h2>Your Books</h2>
+    {% if books %}
+        {% for book in books %}
+            <div class="book-card">
+                <h3>{{ book.title }}</h3>
+                <p><strong>Author:</strong> {{ book.author }}</p>
+                <p><strong>Status:</strong> {{ 'Sold' if book.sold else 'Available' }}</p>
+                <a href="{{ url_for('edit_book', book_id=book.id) }}">Edit</a> |
+                <a href="{{ url_for('delete_book', book_id=book.id) }}">Delete</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No books posted yet.</p>
+    {% endif %}
+
+    <h2>Messages</h2>
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="message">
+                <p><strong>From:</strong> {{ msg.sender_rel.username }}</p>
+                <p>{{ msg.content }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No messages yet.</p>
+    {% endif %}
+
+    <a href="{{ url_for('available_books') }}">Back to Books</a>
+</div>
+
+</body>
+</html>

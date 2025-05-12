@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Send Message</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<div class="header">
+    <h1>Send Message to {{ to }}</h1>
+</div>
+
+<div class="container">
+    <form method="POST">
+        <textarea name="content" placeholder="Write your message here..." required></textarea>
+        <button type="submit">Send Message</button>
+    </form>
+</div>
+
+</body>
+</html>

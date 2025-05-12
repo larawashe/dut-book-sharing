@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body style="background-image: url('{{ url_for('static', filename='images/dut-background.jpg') }}'); background-size: cover; background-position: center;">
+
+<div class="header">
+    <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo" style="height: 50px;">
+    <h1>{% if lang == 'Chinese' %}欢迎来到大连理工大学二手书平台{% else %}Welcome to Dalian University of Technology Book Sharing Platform{% endif %}</h1>
+</div>
+
+<div class="container">
+    {% if lang == 'Chinese' %}
+        <p>登录以进入系统，或注册以创建账户。</p>
+    {% else %}
+        <p>Login to enter the system, or register if you don't have an account.</p>
+    {% endif %}
+
+    <a href="{{ url_for('login') }}?lang={{ lang }}">Login</a> |
+    <a href="{{ url_for('register') }}?lang={{ lang }}">Register</a>
+</div>
+
+</body>
+</html>
