@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -11,13 +12,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'your_secret_key_here'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-
 UPLOAD_FOLDER = os.path.join(basedir, 'static', 'book_images')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-# --- Models ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -32,15 +31,15 @@ class Book(db.Model):
     title = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(150))
     edition = db.Column(db.String(100))
-    condition = db.Column(db.Integer)  # percentage
-    price = db.Column(db.String(50))   # in RMB
+    condition = db.Column(db.Integer)
+    price = db.Column(db.String(50))
     description = db.Column(db.Text, nullable=True)
     campus = db.Column(db.String(100))
-    contact = db.Column(db.String(100))  # WeChat/QQ
+    contact = db.Column(db.String(100))
     email = db.Column(db.String(120), nullable=True)
     isbn = db.Column(db.String(13), unique=True, nullable=False)
-    language = db.Column(db.String(50))  # English / Chinese
-    listing_type = db.Column(db.String(10))  # sell / free
+    language = db.Column(db.String(50))
+    listing_type = db.Column(db.String(10))
     sold = db.Column(db.Boolean, default=False)
     posted_by = db.Column(db.String(80), db.ForeignKey('user.username'))
     image_filename = db.Column(db.String(255))
@@ -86,7 +85,6 @@ def available_books():
 def post_book():
     if 'username' not in session:
         return redirect(url_for('login'))
-
     if request.method == 'POST':
         title = request.form.get('title')
         author = request.form.get('author')
@@ -100,27 +98,16 @@ def post_book():
         isbn = request.form.get('isbn')
         language = request.form.get('language')
         listing_type = request.form.get('listing_type')
-
         image = request.files.get('book_image')
-        qr = request.files.get('payment_qr')
-
         image_filename = None
         qr_filename = None
-
         if image and image.filename != '':
             image_filename = f"{isbn}.jpg"
-            try:
-                img = Image.open(image)
-                img.thumbnail((120, 120))
-                img.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
-            except Exception as e:
-                print("Image processing failed:", str(e))
-                return "Error processing image", 500
-
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+        qr = request.files.get('payment_qr')
         if qr and qr.filename != '':
             qr_filename = f"{isbn}_qr.jpg"
             qr.save(os.path.join(app.config['UPLOAD_FOLDER'], qr_filename))
-
         new_book = Book(
             title=title,
             author=author,
@@ -138,12 +125,9 @@ def post_book():
             image_filename=image_filename,
             payment_qr=qr_filename
         )
-
         db.session.add(new_book)
         db.session.commit()
-
         return redirect(url_for('available_books'))
-
     lang = request.args.get('lang', 'English')
     return render_template('post_book.html', lang=lang)
 
@@ -152,12 +136,9 @@ def post_book():
 def edit_book(book_id):
     if 'username' not in session:
         return redirect(url_for('login'))
-
     book = Book.query.get_or_404(book_id)
-
     if book.posted_by != session['username']:
         return "Access Denied", 403
-
     if request.method == 'POST':
         book.title = request.form.get('title')
         book.author = request.form.get('author')
@@ -172,28 +153,18 @@ def edit_book(book_id):
         book.language = request.form.get('language')
         book.listing_type = request.form.get('listing_type')
         book.sold = True if request.form.get('sold') else False
-
         image = request.files.get('book_image')
         if image and image.filename != '':
             image_filename = f"{book.isbn}.jpg"
-            try:
-                img = Image.open(image)
-                img.thumbnail((120, 120))
-                img.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
-                book.image_filename = image_filename
-            except Exception as e:
-                print("Image processing failed:", str(e))
-                return "Error processing image", 500
-
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            book.image_filename = image_filename
         qr = request.files.get('payment_qr')
         if qr and qr.filename != '':
             qr_filename = f"{book.isbn}_qr.jpg"
             qr.save(os.path.join(app.config['UPLOAD_FOLDER'], qr_filename))
             book.payment_qr = qr_filename
-
         db.session.commit()
         return redirect(url_for('available_books'))
-
     lang = request.args.get('lang', 'English')
     return render_template('edit_book.html', book=book, lang=lang)
 
@@ -202,15 +173,11 @@ def edit_book(book_id):
 def delete_book(book_id):
     if 'username' not in session:
         return redirect(url_for('login'))
-
     book = Book.query.get_or_404(book_id)
-
     if book.posted_by != session['username']:
         return "Access Denied", 403
-
     db.session.delete(book)
     db.session.commit()
-
     return redirect(url_for('profile'))
 
 
@@ -218,32 +185,27 @@ def delete_book(book_id):
 def profile():
     if 'username' not in session:
         return redirect(url_for('login'))
-
     user = User.query.filter_by(username=session['username']).first()
     my_books = Book.query.filter_by(posted_by=session['username']).all()
     messages = Message.query.filter_by(receiver_id=user.id).all()
-    lang = request.args.get('lang', 'English')
-    return render_template('profile.html', user=user, books=my_books, messages=messages, lang=lang)
+    return render_template('profile.html', user=user, books=my_books, messages=messages,
+                           lang=request.args.get('lang', 'English'))
 
 
 @app.route('/message/<string:to_username>', methods=['GET', 'POST'])
 def send_message(to_username):
     if 'username' not in session:
         return redirect(url_for('login'))
-
     sender = User.query.filter_by(username=session['username']).first()
     receiver = User.query.filter_by(username=to_username).first()
-
     if not receiver:
         return "User not found", 404
-
     if request.method == 'POST':
         content = request.form.get('content')
         msg = Message(content=content, sender_id=sender.id, receiver_id=receiver.id)
         db.session.add(msg)
         db.session.commit()
         return redirect(url_for('available_books'))
-
     return render_template('send_message.html', to=receiver.username)
 
 
@@ -251,29 +213,17 @@ def send_message(to_username):
 def i_want_this(book_id):
     if 'username' not in session:
         return redirect(url_for('login'))
-
     book = Book.query.get_or_404(book_id)
     seller = User.query.filter_by(username=book.posted_by).first()
     buyer = User.query.filter_by(username=session['username']).first()
-
-    message = Message(
+    msg = Message(
         content=f"Buyer '{buyer.username}' is interested in your book: {book.title}",
         sender_id=buyer.id,
         receiver_id=seller.id
     )
-
-    db.session.add(message)
+    db.session.add(msg)
     db.session.commit()
-    return redirect(url_for('purchase_book', book_id=book.id))
-
-
-@app.route('/book/<int:book_id>/purchase')
-def purchase_book(book_id):
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    book = Book.query.get_or_404(book_id)
-    return render_template('purchase.html', book=book)
+    return redirect(url_for('available_books'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -282,13 +232,11 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         user = User.query.filter_by(username=username).first()
-
         if user and bcrypt.check_password_hash(user.password, password):
             session['username'] = username
             return redirect(url_for('available_books'))
         else:
             return "Invalid credentials"
-
     return render_template('login.html')
 
 
@@ -297,20 +245,16 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-
         if not password or len(password) < 8:
             return "Password must be at least 8 characters"
-
         if User.query.filter_by(username=username).first():
             return "Username already taken"
-
         hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
         new_user = User(username=username, password=hashed_pw)
         db.session.add(new_user)
         db.session.commit()
         session['username'] = username
         return redirect(url_for('available_books'))
-
     return render_template('register.html')
 
 
@@ -322,6 +266,31 @@ def logout():
 
 with app.app_context():
     db.create_all()
+
+
+@app.route('/book/<int:book_id>/purchase')
+def purchase_book(book_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    book = Book.query.get_or_404(book_id)
+    return render_template('purchase.html', book=book)
+
+
+@app.route('/i_want_this_new/<int:book_id>')
+def i_want_this_new(book_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    book = Book.query.get_or_404(book_id)
+    seller = User.query.filter_by(username=book.posted_by).first()
+    buyer = User.query.filter_by(username=session['username']).first()
+    message = Message(
+        content=f"Buyer '{buyer.username}' is interested in your book: {book.title}",
+        sender_id=buyer.id,
+        receiver_id=seller.id
+    )
+    db.session.add(message)
+    db.session.commit()
+    return redirect(url_for('purchase_book', book_id=book.id))
 
 
 if __name__ == '__main__':
