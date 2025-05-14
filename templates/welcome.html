@@ -2,26 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to DUT Book Sharing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body style="background-image: url('{{ url_for('static', filename='images/dut-background.jpg') }}'); background-size: cover; background-position: center;">
+<body>
 
-<div class="header">
-    <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo" style="height: 50px;">
-    <h1>{% if lang == 'Chinese' %}欢迎来到大连理工大学二手书平台{% else %}Welcome to Dalian University of Technology Book Sharing Platform{% endif %}</h1>
+<div class="page-wrapper">
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo">
+        <h1>{% if lang == 'Chinese' %}欢迎来到大连理工大学二手书平台{% else %}Welcome to DUT Book Sharing Platform{% endif %}</h1>
+    </div>
+
+    <div class="container">
+        <div class="language-switch">
+            <strong><i class="fas fa-globe"></i> Language:</strong>
+            <a href="?lang=English" {% if lang == 'English' %}class="active"{% endif %}>English</a> |
+            <a href="?lang=Chinese" {% if lang == 'Chinese' %}class="active"{% endif %}>中文</a>
+        </div>
+
+        <div class="welcome-content">
+            {% if lang == 'Chinese' %}
+                <p class="welcome-message"><i class="fas fa-book-open"></i> 欢迎使用大连理工大学二手书分享平台！请登录以进入系统，或注册以创建账户。</p>
+            {% else %}
+                <p class="welcome-message"><i class="fas fa-book-open"></i> Welcome to the Dalian University of Technology Book Sharing Platform! Please login to enter the system, or register if you don't have an account.</p>
+            {% endif %}
+        </div>
+
+        <div class="welcome-benefits-section">
+            <div class="welcome-benefits">
+                <div class="benefit-item">
+                    <i class="fas fa-exchange-alt fa-2x"></i>
+                    <h3>{% if lang == 'Chinese' %}交换书籍{% else %}Exchange Books{% endif %}</h3>
+                    <p>{% if lang == 'Chinese' %}在校园内轻松买卖二手教科书。{% else %}Easily buy and sell second-hand textbooks on campus.{% endif %}</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-coins fa-2x"></i>
+                    <h3>{% if lang == 'Chinese' %}节省资金{% else %}Save Money{% endif %}</h3>
+                    <p>{% if lang == 'Chinese' %}以合理的价格获取所需的书籍。{% else %}Get the books you need at reasonable prices.{% endif %}</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-users fa-2x"></i>
+                    <h3>{% if lang == 'Chinese' %}校园社区{% else %}Campus Community{% endif %}</h3>
+                    <p>{% if lang == 'Chinese' %}与同学直接联系交流。{% else %}Connect directly with fellow students.{% endif %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-buttons">
+            <a href="{{ url_for('login') }}?lang={{ lang }}" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> {% if lang == 'Chinese' %}登录{% else %}Login{% endif %}
+            </a>
+            <a href="{{ url_for('register') }}?lang={{ lang }}" class="btn-register">
+                <i class="fas fa-user-plus"></i> {% if lang == 'Chinese' %}注册{% else %}Register{% endif %}
+            </a>
+        </div>
+    </div>
 </div>
 
-<div class="container">
-    {% if lang == 'Chinese' %}
-        <p>登录以进入系统，或注册以创建账户。</p>
-    {% else %}
-        <p>Login to enter the system, or register if you don't have an account.</p>
-    {% endif %}
-
-    <a href="{{ url_for('login') }}?lang={{ lang }}">Login</a> |
-    <a href="{{ url_for('register') }}?lang={{ lang }}">Register</a>
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple animation for benefit items
+        const benefits = document.querySelectorAll('.benefit-item');
+        benefits.forEach((benefit, index) => {
+            benefit.style.animationDelay = (index * 0.2) + 's';
+        });
+    });
+</script>
 
 </body>
 </html>

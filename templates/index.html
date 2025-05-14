@@ -2,70 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Available Books</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
-<div class="header">
-    <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo" style="height: 50px;">
-    <h1>Dalian University of Technology</h1>
-    <h2>Second Hand Book Sharing Platform</h2>
-</div>
-
-<div class="container">
-
-    <div class="language-switch">
-        <strong>Language:</strong>
-        <a href="?lang=English">English</a> |
-        <a href="?lang=Chinese">中文</a>
+<div class="page-wrapper">
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo">
+        <h1>Dalian University of Technology</h1>
+        <h2>Second Hand Book Sharing Platform</h2>
     </div>
 
-    <form method="get" class="search-bar">
-        <input type="text" name="search" placeholder="Search by title, author, or ISBN">
-        <button type="submit">Search</button>
-    </form>
+    <div class="container">
+        <div class="language-switch">
+            <strong><i class="fas fa-globe"></i> Language:</strong>
+            <a href="?lang=English" {% if lang == 'English' %}class="active"{% endif %}>English</a> |
+            <a href="?lang=Chinese" {% if lang == 'Chinese' %}class="active"{% endif %}>中文</a>
+        </div>
 
-    {% if 'username' in session %}
-        <p>Welcome, {{ session.username }}!</p>
-        <a href="{{ url_for('post_book') }}?lang={{ lang }}">Post a Book</a> |
-        <a href="{{ url_for('profile') }}?lang={{ lang }}">My Profile</a> |
-        <a href="{{ url_for('logout') }}">Logout</a>
-    {% else %}
-        <a href="{{ url_for('login') }}?lang={{ lang }}">Login</a> |
-        <a href="{{ url_for('register') }}?lang={{ lang }}">Register</a>
-    {% endif %}
+        <form method="get" class="search-bar">
+            <input type="text" name="search" placeholder="Search by title, author, or ISBN">
+            <button type="submit"><i class="fas fa-search"></i> Search</button>
+        </form>
 
-    <h2>Available Books</h2>
+        <div class="nav-links">
+            {% if 'username' in session %}
+                <span class="welcome-message"><i class="fas fa-user"></i> Welcome, {{ session.username }}!</span>
+                <a href="{{ url_for('post_book') }}?lang={{ lang }}"><i class="fas fa-plus-circle"></i> Post a Book</a>
+                <a href="{{ url_for('profile') }}?lang={{ lang }}"><i class="fas fa-user-circle"></i> My Profile</a>
+                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}?lang={{ lang }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="{{ url_for('register') }}?lang={{ lang }}"><i class="fas fa-user-plus"></i> Register</a>
+            {% endif %}
+        </div>
 
-    {% if books %}
-        {% for book in books %}
-            <div class="book-card">
-                {% if book.image_filename %}
-                    <img src="{{ url_for('static', filename='book_images/' + book.image_filename) }}" alt="Book Image" class="book-image">
-                {% endif %}
-                <div class="book-details">
-                    <h3>{{ book.title }}</h3>
-                    <p><strong>Author:</strong> {{ book.author }}</p>
-                    <p><strong>Edition:</strong> {{ book.edition }}</p>
-                    <p><strong>ISBN:</strong> {{ book.isbn }}</p>
-                    <p><strong>Condition:</strong> {{ book.condition }}%</p>
-                    <p><strong>Price:</strong> {{ book.price }} RMB</p>
-                    <p><strong>Description:</strong> {{ book.description }}</p>
-                    <p><strong>Campus:</strong> {{ book.campus }}</p>
-                    <p><strong>Contact:</strong> {{ book.contact }}</p>
-                </div>
+        <h2><i class="fas fa-book"></i> Available Books</h2>
 
-                <a href="{{ url_for('i_want_this', book_id=book.id) }}" class="btn-want">I Want This</a>
+        {% if books %}
+            <div class="books-container">
+                {% for book in books %}
+                    <div class="book-card">
+                        <div class="book-card-header">
+                            <div class="book-image-container">
+                                {% if book.image_filename %}
+                                    <img src="{{ url_for('static', filename='book_images/' + book.image_filename) }}" alt="Book Image" class="book-image">
+                                {% else %}
+                                    <div class="book-image-placeholder">
+                                        <i class="fas fa-book fa-4x"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="book-title-area">
+                                <h3>{{ book.title }}</h3>
+                                <p><i class="fas fa-user-edit"></i> <strong>Author:</strong> {{ book.author }}</p>
+                            </div>
+                        </div>
+                        <div class="book-details">
+                            <div class="book-info-grid">
+                                <div class="book-info-item">
+                                    <p><i class="fas fa-bookmark"></i> <strong>Edition:</strong> {{ book.edition }}</p>
+                                </div>
+                                <div class="book-info-item">
+                                    <p><i class="fas fa-barcode"></i> <strong>ISBN:</strong> {{ book.isbn }}</p>
+                                </div>
+                                <div class="book-info-item">
+                                    <p><i class="fas fa-star-half-alt"></i> <strong>Condition:</strong> 
+                                        <div class="condition-bar">
+                                            <div class="condition-fill" style="width: {{ book.condition }}%;"></div>
+                                        </div>
+                                        <span class="condition-text">{{ book.condition }}%</span>
+                                    </p>
+                                </div>
+                                <div class="book-info-item">
+                                    <p><i class="fas fa-tag"></i> <strong>Price:</strong> {{ book.price }} RMB</p>
+                                </div>
+                            </div>
+                            
+                            <div class="book-description">
+                                <p><i class="fas fa-info-circle"></i> <strong>Description:</strong> 
+                                    <span class="description-text">{{ book.description }}</span>
+                                </p>
+                            </div>
+                            
+                            <div class="book-contact-info">
+                                <p><i class="fas fa-map-marker-alt"></i> <strong>Campus:</strong> {{ book.campus }}</p>
+                                <p><i class="fas fa-comments"></i> <strong>Contact:</strong> {{ book.contact }}</p>
+                            </div>
+                            
+                            <a href="{{ url_for('i_want_this', book_id=book.id) }}" class="btn-want">
+                                <i class="fas fa-shopping-cart"></i> I Want This
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-    {% else %}
-        <p>No books available yet.</p>
-    {% endif %}
+        {% else %}
+            <div class="no-books">
+                <i class="fas fa-exclamation-circle fa-3x"></i>
+                <p>No books available yet.</p>
+            </div>
+        {% endif %}
 
-    <a href="{{ url_for('welcome') }}?lang={{ lang }}" class="back-btn">← Back to Welcome</a>
-
+        <a href="{{ url_for('welcome') }}?lang={{ lang }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Welcome
+        </a>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate condition bars
+        const conditionBars = document.querySelectorAll('.condition-fill');
+        conditionBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0';
+            setTimeout(() => {
+                bar.style.transition = 'width 1s ease-in-out';
+                bar.style.width = width;
+            }, 100);
+        });
+    });
+</script>
 
 </body>
 </html>

@@ -2,45 +2,177 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}'s Profile | DUT Book Sharing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
-<div class="header">
-    <h1>{{ user.username }}'s Profile</h1>
+<div class="page-wrapper">
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo">
+        <h1><i class="fas fa-user-circle"></i> {{ user.username }}'s Profile</h1>
+    </div>
+
+    <div class="container">
+        <div class="language-switch">
+            <strong><i class="fas fa-globe"></i> Language:</strong>
+            <a href="?lang=English" {% if lang == 'English' %}class="active"{% endif %}>English</a> |
+            <a href="?lang=Chinese" {% if lang == 'Chinese' %}class="active"{% endif %}>中文</a>
+        </div>
+        
+        <div class="profile-tabs">
+            <button class="tab-button active" data-tab="books">
+                <i class="fas fa-book"></i> {% if lang == 'Chinese' %}我的书籍{% else %}My Books{% endif %}
+            </button>
+            <button class="tab-button" data-tab="messages">
+                <i class="fas fa-envelope"></i> {% if lang == 'Chinese' %}消息{% else %}Messages{% endif %}
+                {% if messages %}<span class="message-badge">{{ messages|length }}</span>{% endif %}
+            </button>
+        </div>
+        
+        <div class="tab-content" id="books-tab">
+            <div class="tab-header">
+                <h2><i class="fas fa-book"></i> {% if lang == 'Chinese' %}您的书籍{% else %}Your Books{% endif %}</h2>
+                <a href="{{ url_for('post_book') }}?lang={{ lang }}" class="action-button">
+                    <i class="fas fa-plus-circle"></i> {% if lang == 'Chinese' %}添加新书{% else %}Add New Book{% endif %}
+                </a>
+            </div>
+            
+            {% if books %}
+                <div class="books-container">
+                    {% for book in books %}
+                        <div class="book-card">
+                            <div class="book-card-header">
+                                {% if book.image_filename %}
+                                    <img src="{{ url_for('static', filename='book_images/' + book.image_filename) }}" alt="Book Image" class="book-image">
+                                {% else %}
+                                    <div class="book-image-placeholder">
+                                        <i class="fas fa-book fa-4x"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="book-title-area">
+                                    <h3>{{ book.title }}</h3>
+                                    <p><i class="fas fa-user-edit"></i> <strong>Author:</strong> {{ book.author }}</p>
+                                </div>
+                            </div>
+                            <div class="book-details">
+                                <div class="book-info-grid">
+                                    <div class="book-info-item">
+                                        <p><i class="fas fa-tag"></i> <strong>Price:</strong> {{ book.price }} RMB</p>
+                                    </div>
+                                    <div class="book-info-item">
+                                        <p class="book-status">
+                                            <i class="fas {% if book.sold %}fa-check-circle{% else %}fa-clock{% endif %}"></i>
+                                            <strong>Status:</strong> 
+                                            <span class="status-badge {% if book.sold %}sold{% else %}available{% endif %}">
+                                                {% if book.sold %}
+                                                    {% if lang == 'Chinese' %}已售出{% else %}Sold{% endif %}
+                                                {% else %}
+                                                    {% if lang == 'Chinese' %}可购买{% else %}Available{% endif %}
+                                                {% endif %}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="book-actions">
+                                    <a href="{{ url_for('edit_book', book_id=book.id) }}?lang={{ lang }}" class="action-button">
+                                        <i class="fas fa-edit"></i> {% if lang == 'Chinese' %}编辑{% else %}Edit{% endif %}
+                                    </a>
+                                    <a href="{{ url_for('delete_book', book_id=book.id) }}?lang={{ lang }}" class="action-button danger"
+                                    onclick="return confirm('{% if lang == 'Chinese' %}确定要删除这本书吗？{% else %}Are you sure you want to delete this book?{% endif %}')">
+                                        <i class="fas fa-trash-alt"></i> {% if lang == 'Chinese' %}删除{% else %}Delete{% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-books">
+                    <i class="fas fa-book-open fa-3x"></i>
+                    <p>{% if lang == 'Chinese' %}您还没有发布任何书籍。{% else %}You haven't posted any books yet.{% endif %}</p>
+                    <a href="{{ url_for('post_book') }}?lang={{ lang }}" class="btn-want">
+                        <i class="fas fa-plus-circle"></i> {% if lang == 'Chinese' %}发布新书{% else %}Post a Book{% endif %}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="tab-content" id="messages-tab" style="display: none;">
+            <h2><i class="fas fa-envelope"></i> {% if lang == 'Chinese' %}消息{% else %}Messages{% endif %}</h2>
+            
+            {% if messages %}
+                <div class="messages-container">
+                    {% for msg in messages %}
+                        <div class="message-card">
+                            <div class="message-header">
+                                <span class="message-from">
+                                    <i class="fas fa-user"></i> <strong>{% if lang == 'Chinese' %}发件人{% else %}From{% endif %}:</strong> {{ msg.sender_rel.username }}
+                                </span>
+                                <span class="message-time">
+                                    <i class="fas fa-clock"></i> Just now
+                                </span>
+                            </div>
+                            <div class="message-content">
+                                {{ msg.content }}
+                            </div>
+                            <div class="message-actions">
+                                <button class="action-button" onclick="replyToMessage('{{ msg.sender_rel.username }}')">
+                                    <i class="fas fa-reply"></i> {% if lang == 'Chinese' %}回复{% else %}Reply{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-messages">
+                    <i class="fas fa-envelope-open fa-3x"></i>
+                    <p>{% if lang == 'Chinese' %}您还没有收到任何消息。{% else %}You don't have any messages yet.{% endif %}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <a href="{{ url_for('available_books') }}?lang={{ lang }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> {% if lang == 'Chinese' %}返回书籍列表{% else %}Back to Books{% endif %}
+        </a>
+    </div>
 </div>
 
-<div class="container">
-    <h2>Your Books</h2>
-    {% if books %}
-        {% for book in books %}
-            <div class="book-card">
-                <h3>{{ book.title }}</h3>
-                <p><strong>Author:</strong> {{ book.author }}</p>
-                <p><strong>Status:</strong> {{ 'Sold' if book.sold else 'Available' }}</p>
-                <a href="{{ url_for('edit_book', book_id=book.id) }}">Edit</a> |
-                <a href="{{ url_for('delete_book', book_id=book.id) }}">Delete</a>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No books posted yet.</p>
-    {% endif %}
-
-    <h2>Messages</h2>
-    {% if messages %}
-        {% for msg in messages %}
-            <div class="message">
-                <p><strong>From:</strong> {{ msg.sender_rel.username }}</p>
-                <p>{{ msg.content }}</p>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No messages yet.</p>
-    {% endif %}
-
-    <a href="{{ url_for('available_books') }}">Back to Books</a>
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Hide all tab contents
+                tabContents.forEach(content => content.style.display = 'none');
+                
+                // Show the selected tab content
+                const tabId = this.dataset.tab + '-tab';
+                document.getElementById(tabId).style.display = 'block';
+            });
+        });
+        
+        // Simple animation for book cards
+        const bookCards = document.querySelectorAll('.book-card');
+        bookCards.forEach((card, index) => {
+            card.style.animationDelay = (index * 0.1) + 's';
+        });
+    });
+    
+    function replyToMessage(username) {
+        alert('Feature to reply to ' + username + ' will be implemented soon.');
+    }
+</script>
 
 </body>
 </html>
