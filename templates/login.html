@@ -2,29 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | DUT Book Sharing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
-<div class="header">
-    <h1>Dalian University of Technology</h1>
-    <h2>Second Hand Book Sharing Platform</h2>
+<div class="page-wrapper">
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo">
+        <h1>Dalian University of Technology</h1>
+        <h2>Second Hand Book Sharing Platform</h2>
+    </div>
+
+    <div class="container">
+        <div class="language-switch">
+            <strong><i class="fas fa-globe"></i> Language:</strong>
+            <a href="?lang=English" {% if lang == 'English' %}class="active"{% endif %}>English</a> |
+            <a href="?lang=Chinese" {% if lang == 'Chinese' %}class="active"{% endif %}>中文</a>
+        </div>
+
+        <h2><i class="fas fa-sign-in-alt"></i> {% if lang == 'Chinese' %}登录{% else %}Login{% endif %}</h2>
+        
+        <form method="POST" class="login-form">
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i> 
+                    {% if lang == 'Chinese' %}用户名:{% else %}Username:{% endif %}
+                </label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock"></i> 
+                    {% if lang == 'Chinese' %}密码:{% else %}Password:{% endif %}
+                </label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit">
+                <i class="fas fa-sign-in-alt"></i> 
+                {% if lang == 'Chinese' %}登录{% else %}Login{% endif %}
+            </button>
+        </form>
+        
+        <p class="register-link">
+            {% if lang == 'Chinese' %}
+                <a href="{{ url_for('register') }}?lang={{ lang }}">
+                    <i class="fas fa-user-plus"></i> 还没有账号？ 点击这里注册
+                </a>
+            {% else %}
+                <a href="{{ url_for('register') }}?lang={{ lang }}">
+                    <i class="fas fa-user-plus"></i> Don't have an account? Register here
+                </a>
+            {% endif %}
+        </p>
+        
+        <a href="{{ url_for('welcome') }}?lang={{ lang }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> {% if lang == 'Chinese' %}返回欢迎页面{% else %}Back to Welcome{% endif %}
+        </a>
+    </div>
 </div>
 
-<div class="container">
-    <h2>Login</h2>
-    <form method="POST">
-        <label>Username:
-            <input type="text" name="username" required>
-        </label>
-        <label>Password:
-            <input type="password" name="password" required>
-        </label>
-        <button type="submit">Login</button>
-    </form>
-    <p><a href="{{ url_for('register') }}">Don't have an account? Register</a></p>
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple form validation feedback
+        const form = document.querySelector('.login-form');
+        const inputs = form.querySelectorAll('input');
+        
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+                if (this.value) {
+                    this.classList.add('valid');
+                } else {
+                    this.classList.remove('valid');
+                }
+            });
+        });
+    });
+</script>
 
 </body>
 </html>
