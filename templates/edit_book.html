@@ -1,44 +1,179 @@
-@app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
-def edit_book(book_id):
-    if 'username' not in session:
-        return redirect(url_for('login'))
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Book | DUT Book Sharing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
 
-    book = Book.query.get_or_404(book_id)
+<div class="page-wrapper">
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/dut-logo.png') }}" alt="Logo">
+        <h1><i class="fas fa-edit"></i> Edit Book</h1>
+    </div>
 
-    if book.posted_by != session['username']:
-        return "Access Denied", 403
+    <div class="container">
+        <div class="language-switch">
+            <strong><i class="fas fa-globe"></i> Language:</strong>
+            <a href="?lang=English" {% if lang == 'English' %}class="active"{% endif %}>English</a> |
+            <a href="?lang=Chinese" {% if lang == 'Chinese' %}class="active"{% endif %}>中文</a>
+        </div>
 
-    if request.method == 'POST':
-        book.title = request.form.get('title')
-        book.author = request.form.get('author')
-        book.edition = request.form.get('edition')
-        book.condition = request.form.get('condition')
-        book.price = request.form.get('price')
-        book.description = request.form.get('description')
-        book.campus = request.form.get('campus')
-        book.contact = request.form.get('contact')
-        book.email = request.form.get('email')
-        book.isbn = request.form.get('isbn')
-        book.language = request.form.get('language')
-        book.listing_type = request.form.get('listing_type')
-        book.sold = True if request.form.get('sold') else False
+        <div class="form-container">
+            <form action="{{ url_for('edit_book', book_id=book.id) }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" name="title" value="{{ book.title }}" required>
+                </div>
 
-        image = request.files.get('book_image')
-        if image and image.filename != '':
-            image_filename = f"{book.isbn}.jpg"
-            img = Image.open(image)
-            img.thumbnail((120, 120))
-            img.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
-            book.image_filename = image_filename
+                <div class="form-group">
+                    <label for="author">Author:</label>
+                    <input type="text" id="author" name="author" value="{{ book.author }}" required>
+                </div>
 
-        qr = request.files.get('payment_qr')
-        if qr and qr.filename != '':
-            qr_filename = f"{book.isbn}_qr.jpg"
-            qr.save(os.path.join(app.config['UPLOAD_FOLDER'], qr_filename))
-            book.payment_qr = qr_filename
+                <div class="form-group">
+                    <label for="isbn">ISBN:</label>
+                    <input type="text" id="isbn" name="isbn" value="{{ book.isbn }}" required>
+                </div>
 
-        db.session.commit()
-        return redirect(url_for('available_books'))
+                <div class="form-group">
+                    <label for="edition">Edition:</label>
+                    <input type="text" id="edition" name="edition" value="{{ book.edition }}">
+                </div>
 
-    lang = request.args.get('lang', 'English')
-    return render_template('edit_book.html', book=book, lang=lang)
+                <div class="form-group">
+                    <label for="condition">Condition (0-100):</label>
+                    <input type="number" id="condition" name="condition" value="{{ book.condition }}" min="0" max="100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Price (RMB):</label>
+                    <input type="text" id="price" name="price" value="{{ book.price }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description">{{ book.description }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="campus">Campus:</label>
+                    <input type="text" id="campus" name="campus" value="{{ book.campus }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="contact">Contact:</label>
+                    <input type="text" id="contact" name="contact" value="{{ book.contact }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="{{ book.email }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="language">Language:</label>
+                    <select id="language" name="language">
+                        <option value="English" {% if book.language == 'English' %}selected{% endif %}>English</option>
+                        <option value="Chinese" {% if book.language == 'Chinese' %}selected{% endif %}>Chinese</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="listing_type">Listing Type:</label>
+                    <select id="listing_type" name="listing_type">
+                        <option value="sell" {% if book.listing_type == 'sell' %}selected{% endif %}>Sell</option>
+                        <option value="free" {% if book.listing_type == 'free' %}selected{% endif %}>Free</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="book_image">Book Image:</label>
+                    <input type="file" id="book_image" name="book_image" accept="image/*">
+                    {% if book.image_filename %}
+                        <img src="{{ url_for('static', filename='book_images/' + book.image_filename) }}" alt="Current Book Image" class="current-image">
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="payment_qr">Payment QR Code:</label>
+                    <input type="file" id="payment_qr" name="payment_qr" accept="image/*">
+                    {% if book.payment_qr %}
+                        <img src="{{ url_for('static', filename='book_images/' + book.payment_qr) }}" alt="Current Payment QR" class="current-qr">
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="sold">Mark as Sold:</label>
+                    <input type="checkbox" id="sold" name="sold" {% if book.sold %}checked{% endif %}>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="action-button">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{{ url_for('profile') }}?lang={{ lang }}" class="action-button">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    textarea {
+        height: 100px;
+        resize: vertical;
+    }
+
+    .current-image,
+    .current-qr {
+        max-width: 200px;
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        padding: 5px;
+    }
+
+    .form-actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+</style>
+
+</body>
+</html>

@@ -4,6 +4,56 @@
     <meta charset="UTF-8">
     <title>Purchase Book</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #eee;
+            margin: 20px 0;
+        }
+        .progress {
+            width: 0;
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success-checkmark {
+            color: #4CAF50;
+            font-size: 48px;
+        }
+        .btn-next {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .btn-next:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
 
@@ -12,36 +62,100 @@
 </div>
 
 <div class="container purchase-container">
-    <h2>Confirm Your Interest</h2>
+    <div class="progress-bar">
+        <div id="progress" class="progress"></div>
+    </div>
 
-    <div class="book-card">
-        {% if book.image_filename %}
-            <img src="{{ url_for('static', filename='book_images/' + book.image_filename) }}" alt="Book Image" class="book-image">
+    <!-- Step 1: Book Details -->
+    <div id="step1" class="step active">
+        <h2>Step 1: Confirm Book Details</h2>
+        <div class="book-card">
+            {% if book.image_filename %}
+                <img src="{{ url_for('static', filename='book_images/' + book.image_filename) }}" alt="Book Image" class="book-image">
+            {% endif %}
+            <div class="book-details">
+                <h3>{{ book.title }}</h3>
+                <p><strong>Author:</strong> {{ book.author }}</p>
+                <p><strong>Edition:</strong> {{ book.edition }}</p>
+                <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+                <p><strong>Price:</strong> {{ book.price }} RMB</p>
+                <p><strong>Seller:</strong> {{ book.posted_by }}</p>
+                <p><strong>Contact:</strong> {{ book.contact }}</p>
+            </div>
+        </div>
+        <button class="btn-next" onclick="nextStep(1)">Confirm Details</button>
+    </div>
+
+    <!-- Step 2: Payment Method -->
+    <div id="step2" class="step">
+        <h2>Step 2: Choose Payment Method</h2>
+        <div class="payment-methods">
+            <div>
+                <input type="radio" id="wechat" name="payment" value="wechat" checked>
+                <label for="wechat">WeChat Pay</label>
+            </div>
+            <div>
+                <input type="radio" id="alipay" name="payment" value="alipay">
+                <label for="alipay">Alipay</label>
+            </div>
+        </div>
+        {% if book.payment_qr %}
+            <div class="qr-section">
+                <p>Scan the QR code to pay {{ book.price }} RMB:</p>
+                <img src="{{ url_for('static', filename='book_images/' + book.payment_qr) }}" width="250" alt="Payment QR Code">
+            </div>
+        {% else %}
+            <p>The seller has not provided a payment QR code yet.</p>
         {% endif %}
-        <div class="book-details">
-            <h3>{{ book.title }}</h3>
-            <p><strong>Author:</strong> {{ book.author }}</p>
-            <p><strong>Edition:</strong> {{ book.edition }}</p>
-            <p><strong>ISBN:</strong> {{ book.isbn }}</p>
-            <p><strong>Price:</strong> {{ book.price }} RMB</p>
-            <p><strong>Seller:</strong> {{ book.posted_by }}</p>
-            <p><strong>Contact:</strong> {{ book.contact }}</p>
+        <button class="btn-next" onclick="nextStep(2)">Process Payment</button>
+    </div>
+
+    <!-- Step 3: Processing -->
+    <div id="step3" class="step">
+        <h2>Step 3: Processing Payment</h2>
+        <div style="text-align: center; padding: 40px;">
+            <div class="loading"></div>
+            <p>Processing your payment...</p>
+            <p>Please do not close this window.</p>
         </div>
     </div>
 
-    <h3>Payment</h3>
-    {% if book.payment_qr %}
-        <p>Scan the QR code below to pay using WeChat or Alipay:</p>
-        <img src="{{ url_for('static', filename='book_images/' + book.payment_qr) }}" width="250" alt="Payment QR Code">
-    {% else %}
-        <p>The seller has not provided a payment QR code yet.</p>
-    {% endif %}
+    <!-- Step 4: Confirmation -->
+    <div id="step4" class="step">
+        <h2>Purchase Complete!</h2>
+        <div style="text-align: center; padding: 40px;">
+            <div class="success-checkmark">✓</div>
+            <h3>Thank you for your purchase!</h3>
+            <p>The seller has been notified and will contact you soon.</p>
+            <p>You can also message the seller directly:</p>
+            <a href="{{ url_for('send_message', to_username=book.posted_by) }}" class="btn-message">Message Seller</a>
+        </div>
+    </div>
 
-    <br>
-    <a href="{{ url_for('send_message', to_username=book.posted_by) }}" class="btn-message">Send Message to Seller</a>
     <a href="{{ url_for('available_books') }}" class="back-btn">← Back to Books</a>
-
 </div>
+
+<script>
+function nextStep(currentStep) {
+    // Hide current step
+    document.getElementById('step' + currentStep).classList.remove('active');
+    
+    // Show next step
+    const nextStepNum = currentStep + 1;
+    document.getElementById('step' + nextStepNum).classList.add('active');
+    
+    // Update progress bar
+    const progress = (currentStep / 4) * 100;
+    document.getElementById('progress').style.width = progress + '%';
+    
+    // If moving to processing step, simulate payment processing
+    if (nextStepNum === 3) {
+        setTimeout(() => {
+            nextStep(3);
+        }, 3000); // Show processing for 3 seconds
+    }
+}
+</script>
 
 </body>
 </html>
